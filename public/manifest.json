@@ -1,0 +1,13 @@
+{
+  "name":"明码本 Mingmaben — Naked Language",
+  "short_name":"明码本",
+  "start_url":"../index.html",
+  "display":"standalone",
+  "background_color":"#f4f2ed",
+  "theme_color":"#111111",
+  "description":"An open-source experiment in structural language decoding.",
+  "icons":[
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png"}
+  ]
+}

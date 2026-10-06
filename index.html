@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111111" />
+  <meta name="description" content="Mingmaben — Naked Language. An open-source experiment in structural language decoding." />
+  <link rel="manifest" href="./public/manifest.json" />
+  <link rel="icon" href="./public/icon-192.png" />
+  <link rel="stylesheet" href="./src/styles.css" />
+  <title>明码本 Mingmaben — Naked Language</title>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="badge">V1.0 · TEXT PUBLIC BETA</div>
+      <h1>明码本 <span>Mingmaben</span></h1>
+      <p class="tagline">Naked Language — An open-source experiment in structural language decoding.</p>
+      <p class="cn">结构解译实验 · 无需登录 · 本地程序运算 · 英文先 / 中文后</p>
+    </header>
+
+    <section class="card input-card">
+      <div class="input-title">
+        <div>
+          <strong>Text / 文字</strong>
+          <small>Paste a sentence, paragraph, or chat message. / 粘贴句子、段落或聊天内容。</small>
+        </div>
+        <span class="local-pill">LOCAL ENGINE</span>
+      </div>
+
+      <textarea id="source" rows="10" placeholder="Paste a sentence, paragraph or chat message here…\n在这里粘贴句子、段落或聊天内容……"></textarea>
+
+      <div class="toolbar">
+        <div class="segmented" aria-label="analysis mode">
+          <label><input type="radio" name="mode" value="quick" checked /> Quick</label>
+          <label><input type="radio" name="mode" value="deep" /> Deep</label>
+        </div>
+        <button id="analyze" class="primary">Analyze / 开始解译</button>
+      </div>
+      <p class="microcopy">Quick gives the compact timeless structural reading. Deep also exposes romanization, A–Z expansion, structural anchors and multi-scale confirmations.<br><span class="cn">Quick 给简明无时间结构显影；Deep 额外展开拼音/罗马化、A–Z 原码、结构锚点和多尺度确认。</span></p>
+    </section>
+
+    <section id="results" class="results hidden">
+      <div class="result-head">
+        <div><h2>Reading / 解译结果</h2><p id="romanized" class="mono"></p></div>
+        <button id="copy" class="secondary">Copy result / 复制</button>
+      </div>
+      <div id="result-en" class="card result-card"></div>
+      <div id="result-zh" class="card result-card"></div>
+      <details id="audit-card" class="card audit"><summary>Full code path / 查看完整过程</summary><div id="audit"></div></details>
+      <div class="card feedback">
+        <strong>Did this reading help? / 这次解译如何？</strong>
+        <div class="feedback-buttons">
+          <button data-feedback="correct">Correct / 准</button>
+          <button data-feedback="partial">Partly / 部分准</button>
+          <button data-feedback="wrong">Wrong / 不准</button>
+        </div>
+        <p id="feedback-status" class="status"></p>
+        <button id="export-feedback" class="secondary small">Export my feedback / 导出我的测试反馈</button>
+      </div>
+    </section>
+
+    <section class="card roadmap">
+      <strong>Next version / 下次升级</strong>
+      <p>Voice transcription and screenshot/chat OCR are deliberately postponed to V1.1 so the first public test measures the Mingmaben text engine itself.</p>
+      <p class="cn">语音转写与截图/聊天图片 OCR 暂留到 V1.1，先让第一轮公测只检验明码本文字引擎本身。</p>
+    </section>
+
+    <footer>
+      <p><strong>Open Public Beta</strong> · AGPL-3.0 source package</p>
+      <p>Experimental structural reading only. Not proof of facts, identity, intent, guilt or future events.</p>
+      <p class="cn">仅用于实验性结构解译，不构成现实事实、身份、意图、罪责或未来事件的证明。</p>
+    </footer>
+  </main>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
