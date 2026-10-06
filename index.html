@@ -19,7 +19,7 @@
 <body>
   <main class="shell">
     <header class="hero">
-      <div class="badge">V1.0 · TEXT PUBLIC BETA · R3.1</div>
+      <div class="badge">V1.0 · TEXT PUBLIC BETA · R4 STABLE</div>
       <h1>明码本 <span>Mingmaben</span></h1>
       <p class="tagline">Naked Language — An open-source experiment in structural language decoding.</p>
       <p class="cn">结构解译实验 · 无需登录 · 本地程序运算 · 英文先 / 中文后</p>
@@ -38,17 +38,17 @@
 
       <div class="toolbar">
         <div class="segmented" aria-label="analysis mode">
-          <label><input type="radio" name="mode" value="quick" checked /> Quick</label>
-          <label><input type="radio" name="mode" value="deep" /> Deep</label>
+          <label><input type="radio" name="view" value="reading" checked /> Reading</label>
+          <label><input type="radio" name="view" value="evidence" /> Evidence / Deep</label>
         </div>
         <button id="analyze" class="primary">Analyze / 开始解译</button>
       </div>
-      <p class="microcopy">Quick gives the compact timeless structural reading. Deep also exposes romanization, A–Z expansion, structural anchors and multi-scale confirmations.<br><span class="cn">Quick 给简明无时间结构显影；Deep 额外展开拼音/罗马化、A–Z 原码、结构锚点和多尺度确认。</span></p>
+      <p class="microcopy">Reading and Evidence use the same frozen canonical reading. Evidence only opens the full code path; it never changes the result.<br><span class="cn">Reading 与 Evidence 使用同一个冻结核心结果；Evidence 只展开完整证据，不改变解译。</span></p>
     </section>
 
     <section id="results" class="results hidden">
       <div class="result-head">
-        <div><h2>Reading / 解译结果</h2><p id="romanized" class="mono"></p></div>
+        <div><h2>Stable Canonical Reading / 稳定冻结解译</h2><p id="romanized" class="mono"></p><p id="fingerprint" class="mono"></p></div>
         <button id="copy" class="secondary">Copy result / 复制</button>
       </div>
       <div id="result-en" class="card result-card"></div>
@@ -78,140 +78,6 @@
       <p class="cn">仅用于实验性结构解译，不构成现实事实、身份、意图、罪责或未来事件的证明。</p>
     </footer>
   </main>
-  <script type="module">
-    import { analyzeText } from './src/engine/analyze.js';
-    import { freezeReading } from './src/engine/freeze.js';
-
-    const $ = s => document.querySelector(s);
-    const source = $('#source');
-    let lastResult = null;
-    let lastFrozen = null;
-
-    function escapeHtml(s=''){
-      return String(s).replace(/[&<>"']/g, m => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-      }[m]));
-    }
-
-    function item(label, value){
-      return `<div class="item"><strong>${label}</strong><div>${escapeHtml(value)}</div></div>`;
-    }
-
-    function renderSection(sec){
-      const labels = sec.language === 'en'
-        ? ['English Analysis','Surface Layer','Timeless Structural Reading','Hidden / Incremental Information','Outcome Confirmation Status','Signal Strength','Reality Boundary']
-        : ['中文分析','表面层','无时间结构显影','隐藏 / 增量信息','后来效果确认状态','信号强度','现实边界'];
-      return `<h3>${labels[0]}</h3>${item(labels[1],sec.surface)}${item(labels[2],sec.structural)}${item(labels[3],sec.increment)}${item(labels[4],sec.truthAlignment)}${item(labels[5],sec.signalStrength)}${item(labels[6],sec.realityBoundary)}`;
-    }
-
-    function renderAudit(r){
-      const whole = r.field?.scopes?.whole || {};
-      const reps = Object.entries(whole.repetitions || {})
-        .map(([k,v]) => `${k}×${v}`)
-        .join(', ') || '—';
-
-      const letters = (r.layer0 || []).map(x =>
-        `<div class="letter"><b>${escapeHtml(x.letter)}</b><br><span>${escapeHtml(x.en)}</span><br><small>${escapeHtml(x.zh)}${x.status!=='frozen'?` · ${escapeHtml(x.status)}`:''}</small></div>`
-      ).join('');
-
-      const anchors = (r.field?.anchors || []).map(a =>
-        `<tr><td>${escapeHtml(a.letter)}</td><td>${escapeHtml((a.roles||[]).join(', '))}</td><td>${escapeHtml((a.scopes||[]).join(', '))}</td></tr>`
-      ).join('') || '<tr><td colspan="3">—</td></tr>';
-
-      const confirmations = (r.field?.confirmations || []).map(c =>
-        `<li>${escapeHtml(JSON.stringify(c))}</li>`
-      ).join('') || '<li>—</li>';
-
-      return `
-        <p><b>Romanization / Pinyin:</b> <span class="mono">${escapeHtml(r.romanized || '')}</span></p>
-        <p><b>Grammar model:</b> ${escapeHtml(r.field?.grammarMode || '—')} ·
-        <b>Temporal interpretation:</b> no ·
-        <b>Frequency policy:</b> retain all / no down-weight</p>
-        <p><b>Length:</b> ${whole.length ?? 0} ·
-        <b>First/Last:</b> ${escapeHtml(whole.first || '—')} / ${escapeHtml(whole.last || '—')} ·
-        <b>Center:</b> ${escapeHtml((whole.centers || []).join(' / ') || '—')} ·
-        <b>Framed:</b> ${whole.framed ? 'yes' : 'no'} ·
-        <b>Repetitions:</b> ${escapeHtml(reps)}</p>
-        <p><b>Frozen fingerprint:</b> <span class="mono">${escapeHtml(lastFrozen?.fingerprint || '—')}</span></p>
-        <h4>A–Z Layer 0</h4><div class="letter-grid">${letters}</div>
-        <h4>Structural anchors / 结构锚点</h4>
-        <table><thead><tr><th>Code</th><th>Roles</th><th>Scopes</th></tr></thead><tbody>${anchors}</tbody></table>
-        <h4>Multi-scale confirmations / 多尺度确认</h4><ul>${confirmations}</ul>`;
-    }
-
-    function runAnalysis(){
-      const input = source.value.trim();
-      if(!input){ source.focus(); return; }
-
-      const selected = document.querySelector('input[name="mode"]:checked');
-      const mode = selected ? selected.value : 'quick';
-
-      try {
-        lastResult = analyzeText(input, {mode});
-        lastFrozen = freezeReading(lastResult);
-
-        $('#romanized').textContent = `${mode.toUpperCase()} · ${lastResult.romanized || ''}`;
-        $('#result-en').innerHTML = renderSection(lastResult.sections?.[0] || {});
-        $('#result-zh').innerHTML = renderSection(lastResult.sections?.[1] || {});
-        $('#audit').innerHTML = renderAudit(lastResult);
-        $('#audit-card').open = mode === 'deep';
-        $('#results').classList.remove('hidden');
-        $('#results').scrollIntoView({behavior:'smooth',block:'start'});
-      } catch(e) {
-        console.error(e);
-        alert(`Analysis error / 解译错误: ${e?.message || e}`);
-      }
-    }
-
-    $('#analyze')?.addEventListener('click', runAnalysis);
-    source?.addEventListener('keydown', e => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runAnalysis();
-    });
-
-    $('#copy')?.addEventListener('click', async () => {
-      if(!lastResult) return;
-      const text = [`Frozen fingerprint: ${lastFrozen?.fingerprint || '—'}`]
-        .concat((lastResult.sections || []).map(s =>
-          Object.entries(s).filter(([k]) => k !== 'language')
-            .map(([k,v]) => `${k}: ${v}`).join('\\n')
-        )).join('\\n\\n');
-
-      try {
-        await navigator.clipboard.writeText(text);
-        $('#copy').textContent = 'Copied / 已复制';
-        setTimeout(() => $('#copy').textContent = 'Copy result / 复制', 1500);
-      } catch {}
-    });
-
-    for(const btn of document.querySelectorAll('[data-feedback]')) {
-      btn.addEventListener('click', () => {
-        const rec = {
-          time: new Date().toISOString(),
-          rating: btn.dataset.feedback,
-          input: source.value,
-          fingerprint: lastFrozen?.fingerprint || null,
-          field: lastResult?.field || null
-        };
-        const arr = JSON.parse(localStorage.getItem('mingmaben-feedback') || '[]');
-        arr.push(rec);
-        localStorage.setItem('mingmaben-feedback', JSON.stringify(arr));
-        $('#feedback-status').textContent = 'Saved locally in this browser. / 已保存在当前浏览器本地。';
-      });
-    }
-
-    $('#export-feedback')?.addEventListener('click', () => {
-      const data = localStorage.getItem('mingmaben-feedback') || '[]';
-      const blob = new Blob([data], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'mingmaben-feedback.json';
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 500);
-    });
-
-    if('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(console.warn);
-    }
-  </script>
+  <script type="module" src="./r4.js"></script>
 </body>
 </html>
