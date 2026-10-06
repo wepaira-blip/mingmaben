@@ -1,4 +1,4 @@
-const CACHE='mingmaben-v1.0-text-r1';
+const CACHE='mingmaben-v1.0-text-r2';
 const CORE=[
   './','./index.html','./src/styles.css','./src/app.js',
   './src/engine/analyze.js','./src/engine/normalize.js','./src/engine/pinyin.js',
