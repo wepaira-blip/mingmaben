@@ -3,6 +3,7 @@ import { toFrozenPinyin } from './pinyin.js';
 import { expandLayer0 } from './layer0.js';
 import { extractStructure } from './structure.js';
 import { buildStructuralField } from './field.js';
+import { synthesizeWholeForm } from './synthesize.js';
 import { renderReading } from './render.js';
 
 export function containsHanzi(s='') { return /[\u3400-\u9FFF]/.test(s); }
@@ -28,7 +29,8 @@ export function analyzeNormalized(normalized='') {
   const layer0 = expandLayer0(normalized);
   const features = extractStructure(letters);
   const field = buildStructuralField(normalized, layer0);
-  return { normalized, letters, layer0, features, field };
+  const synthesis = synthesizeWholeForm(field);
+  return { normalized, letters, layer0, features, field, synthesis };
 }
 
 export function analyzeText(input='', {mode='quick'}={}) {
